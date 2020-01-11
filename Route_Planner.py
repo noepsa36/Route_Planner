@@ -1,27 +1,28 @@
 import math
 
 class Path:
-    def __init__(self,path,value = 0):
+    def __init__(self,path,remaining,value = 0):
         self.path = path
         self.value = value
+        self.remaining = remaining
     
     def __repr__(self):
         return "(" + str(self.value) + ",(" + str(self.path) + "))"
 
     def __le__(self,other):
-        return self.value <= other.value
+        return (self.value + self.remaining) <= (other.value + other.remaining)
 
     def __ge__(self,other):
-        return self.value >= other.value
+        return (self.value + self.remaining) >= (other.value + other.remaining)
     
     def __eq__(self,other):
-        return self.value == other.value
+        return (self.value + self.remaining) == (other.value + other.remaining)
     
     def __lt__(self,other):
-        return self.value < other.value
+        return (self.value + self.remaining) < (other.value + other.remaining)
     
     def __gt__(self,other):
-        return self.value > other.value
+        return (self.value + self.remaining) > (other.value + other.remaining)
 
 class Heap:
     def __init__(self, initial_size = 10):
@@ -112,11 +113,10 @@ def distance_between2p(point1,point2):
     return c
 
 def shortest_path(M,start,goal):
-    print("shortest path called")
     explored = set()
     paths = Heap()
     
-    paths.insert(Path([start]))
+    paths.insert(Path([start],distance_between2p(M.intersections[start],M.intersections[goal])))
 
     while goal not in explored and not paths.is_empty():
         currPath = paths.remove()
@@ -124,8 +124,9 @@ def shortest_path(M,start,goal):
 
         for road in M.roads[curr_Int]:
             if road not in explored:
-                new_value = currPath.value + distance_between2p(M.intersections[curr_Int],M.intersections[road]) + distance_between2p(M.intersections[road],M.intersections[goal])
-                paths.insert(Path(currPath.path + [road],new_value))
+                new_value = currPath.value + distance_between2p(M.intersections[curr_Int],M.intersections[road])
+                new_remaining = distance_between2p(M.intersections[road],M.intersections[goal])
+                paths.insert(Path(currPath.path + [road],new_remaining,new_value))
                 print(Path(currPath.path + [road],new_value))
         
         explored.add(curr_Int)
